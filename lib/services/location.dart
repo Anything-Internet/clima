@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:geolocator/geolocator.dart';
 
 // This module is a wrapper around the Geolocator package.  It provides
@@ -17,6 +19,20 @@ class Location {
   LocationPermission? permission;
   late Function? notify;
 
+  get latitude {
+    if (_position == null) {
+      return null;
+    }
+    return _position!.latitude;
+  }
+
+  get longitude {
+    if (_position == null) {
+      return null;
+    }
+    return _position!.longitude;
+  }
+
   // getter / setter for position
   Position? get position {
     return _position;
@@ -35,6 +51,9 @@ class Location {
     getCurrentLocation();
   }
 
+  ///////////////////////////////////////////////////////
+  // main functions - get current location and permission
+
   Future<void> getCurrentLocation() async {
     if (permission == null) {
       await getPermission();
@@ -45,6 +64,9 @@ class Location {
       print("Permission denied");
       return;
     }
+
+    // test code to simulate a delay
+    // sleep(Duration(seconds: 5));
 
     try {
       position = await Geolocator.getCurrentPosition(
