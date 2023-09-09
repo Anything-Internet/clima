@@ -1,84 +1,25 @@
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-
-// This module is a wrapper around the Geolocator package.  It provides
-// a Location class that can be used to get the current location.  The
-// Location class has a notify function that can be set to a function
-// that will be called when the location is updated.  The notify function
-// is called whenever the position property is set.
 
 class Location {
   Position? _position;
   LocationPermission? permission;
   late Function? notify;
-  List<Placemark> placeMarks = [];
-  double? longitude;
-  double? latitude;
-  String? _cityState;
 
-  // getter / setter for position
   Position? get position {
     return _position;
   }
 
-  String? get cityState {
-    return _cityState;
-  }
-
-  set cityState(String? cityState) {
-    _cityState = cityState;
-  }
-
   set position(Position? position) {
-    _position = position!;
-    longitude = position.longitude;
-    latitude = position.latitude;
-
-    print("DEVICE Location: $longitude, $latitude");
-
-    // override default Android location to my location
-    if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
-      longitude = -95.5333662;
-      latitude = 29.7141684;
-      print("ADJUSTED Location: $longitude, $latitude");
+    _position = position;
+    if (notify != null) {
+      notify!();
     }
   }
 
-  Future<String?> findCityState(longitude, latitude) async {
-    placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
-    cityState = "${placeMarks[0].locality} ${placeMarks[0].administrativeArea}".trim();
-    return cityState;
-  }
-
-  Future<void> findCurrentLocation({notify}) async {
-
+  Location({ Function? notify }) {
     this.notify = notify;
-
-    if (permission == null) {
-      await getPermission();
-    }
-
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      print("Location permission access denied");
-      return;
-    }
-
-    try {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.low);
-
-      if(longitude != null && latitude != null) {
-        cityState = await findCityState(longitude, latitude);
-      }
-    } catch (e) {
-      print(e);
-    }
-    finally {
-      if (notify != null) {
-        notify!();
-      }
-    }
+    getCurrentLocation();
   }
 
   Future<void> getPermission() async {
@@ -90,6 +31,34 @@ class Location {
         print(e);
         return;
       }
+    }
+  }
+
+  Future<void> getCurrentLocation() async {
+    if (permission == null) {
+      await getPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      print("Permission denied");
+      return;
+    }
+
+    // simulate a long running operation
+    // sleep(Duration(seconds: 5));
+
+    try {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.low);
+    } catch (e) {
+      print(e);
+    }
+    finally {
+      if (notify != null) {
+        notify!();
+      }
+      print(position);
     }
   }
 }
