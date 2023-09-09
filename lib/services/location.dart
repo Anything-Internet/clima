@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:geolocator/geolocator.dart';
 
 // This module is a wrapper around the Geolocator package.  It provides
