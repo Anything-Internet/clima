@@ -24,7 +24,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(location.position?.toString() ?? 'waiting ...'),
+            Text("Lat: ${location.latitude?.toString() ?? 'waiting ...'}"),
+            Text("Lon: ${location.longitude?.toString() ?? 'waiting ...'}"),
           ],
         ),
       ),
