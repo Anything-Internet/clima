@@ -1,59 +1,55 @@
-import 'dart:io';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 // This module is a wrapper around the Geolocator package.  It provides
 // a Location class that can be used to get the current location.  The
 // Location class has a notify function that can be set to a function
 // that will be called when the location is updated.  The notify function
-// is called whenever the position property is set.  Permissions are requested
-// when the Location class is instantiated.
-
-// Normal usage is to instantiate a Location object in the initState function
-// of the widget that needs the location.  The notify function is set to a
-// function that calls setState.  The position property is used to get the
-// current location.
+// is called whenever the position property is set.
 
 class Location {
   Position? _position;
   LocationPermission? permission;
   late Function? notify;
-
-  get latitude {
-    if (_position == null) {
-      return null;
-    }
-    return _position!.latitude;
-  }
-
-  get longitude {
-    if (_position == null) {
-      return null;
-    }
-    return _position!.longitude;
-  }
+  List<Placemark> placeMarks = [];
+  double? longitude;
+  double? latitude;
+  String _cityState = "";
 
   // getter / setter for position
   Position? get position {
     return _position;
   }
 
-  set position(Position? position) {
-    _position = position;
-    if (notify != null) {
-      notify!();
-    }
+  String get cityState {
+    return _cityState;
   }
 
-  // constructor - get permission and current location
-  Location({ Function? notify }) {
-    this.notify = notify;
-    getCurrentLocation();
+  set cityState(String cityState) {
+    _cityState = cityState;
+    print("cityState: $cityState");
+  }
+
+  set position(Position? position) {
+    _position = position!;
+    longitude = position.longitude;
+    latitude = position.latitude;
+
+    // // override to my location
+    latitude = 29.7141684;
+    longitude = -95.5333662;
+
+    print("longitude: $longitude");
+    print("latitude: $latitude");
   }
 
   ///////////////////////////////////////////////////////
   // main functions - get current location and permission
 
-  Future<void> getCurrentLocation() async {
+  Future<void> getCurrentLocation({notify}) async {
+
+    this.notify = notify;
+
     if (permission == null) {
       await getPermission();
     }
@@ -70,11 +66,19 @@ class Location {
     try {
       position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low);
+
+      if(longitude != null && latitude != null) {
+        placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
+        cityState = "${placeMarks[0].locality}, ${placeMarks[0].administrativeArea}";
+      }
     } catch (e) {
       print(e);
     }
     finally {
-      print(position);
+      if (notify != null) {
+        print("notify");
+        notify!();
+      }
     }
   }
 

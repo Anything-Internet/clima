@@ -1,11 +1,16 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'dart:convert';
 import 'package:intl/intl.dart';
 
+
+// temperature: temp
+// condition
+// city name: name
+
+
 class Weather {
-
   Function? notify;
-
   String? weatherData;
   double? latitude;
   double? longitude;
@@ -17,12 +22,26 @@ class Weather {
   double? weatherClouds;
   String? weatherMain;
 
+  int? weatherConditionCode;
+
+  get weatherIcon {
+    return weatherConditionCode != null
+        ? getWeatherIcon(weatherConditionCode!)
+        : "";
+  }
+
+  get weatherMessage {
+    return weatherTempImperial != null
+        ? getMessage(weatherTempImperial!)
+        : "";
+  }
+
   getWeatherData(
       {required double lat, required double lon, Function? notify}) async {
     latitude = lat;
     longitude = lon;
     Response response = Response("", 404);
-    String apiKey = "78f8acfe89ef6139f0e580e221a12a90";
+    String? apiKey = dotenv.env['WEATHER_API_KEY'];
     String units =
         "imperial"; // "metric" for celsius, "imperial" for fahrenheit
     String url =
@@ -42,7 +61,6 @@ class Weather {
       weatherData = await response.body;
 
       parseWeatherData(weatherData);
-
 
       if (notify != null) {
         notify();
@@ -70,12 +88,12 @@ class Weather {
     }
   }
 
-  String getMessage(int temp) {
-    if (temp > 25) {
+  String getMessage(double temp) {
+    if (temp > 90) {
       return 'It\'s 🍦 time';
-    } else if (temp > 20) {
+    } else if (temp > 75) {
       return 'Time for shorts and 👕';
-    } else if (temp < 10) {
+    } else if (temp < 60) {
       return 'You\'ll need 🧣 and 🧤';
     } else {
       return 'Bring a 🧥 just in case';
@@ -94,13 +112,13 @@ class Weather {
     weatherMain = jsonDecode(weatherData)["current"]["weather"][0]["main"];
     weatherClouds = jsonDecode(weatherData)["current"]["clouds"].toDouble();
 
+    weatherConditionCode = jsonDecode(weatherData)["current"]["weather"][0]["id"].toInt();
 
-
-    print("WeatherTime: ${weatherDateTimeString ?? "No data"}");
-    print("WeatherMain: ${weatherMain ?? "No data"}");
-    print("WeatherTemp: ${weatherTempImperial ?? "No data"}");
-    print("WeatherFeelsLike: ${weatherTempFeelsLikeImperial ?? "No data"}");
-    print("WeatherHumidity: ${weatherHumidity ?? "No data"}");
-    print("WeatherClouds: ${weatherClouds ?? "No data"}");
+    // print("WeatherTime: ${weatherDateTimeString ?? "No data"}");
+    // print("WeatherMain: ${weatherMain ?? "No data"}");
+    // print("WeatherTemp: ${weatherTempImperial ?? "No data"}");
+    // print("WeatherFeelsLike: ${weatherTempFeelsLikeImperial ?? "No data"}");
+    // print("WeatherHumidity: ${weatherHumidity ?? "No data"}");
+    // print("WeatherClouds: ${weatherClouds ?? "No data"}");
   }
 }

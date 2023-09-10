@@ -8,22 +8,33 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  late Location location;
-  late Weather weather = Weather();
+  Location location = Location();
+  Weather weather = Weather();
 
   @override
   void initState() {
     super.initState();
-    location = Location(notify: () {
+    getLocation();
+  }
+
+  getLocation() async {
+    await location.getCurrentLocation(notify: () {
       setState(() {
-        weather.getWeatherData(
-            lat: location.latitude!,
-            lon: location.longitude!,
-            notify: () {
-              setState(() {});
-            });
+        print("location updated");
       });
+      getWeather();
     });
+  }
+
+  getWeather() async {
+    await weather.getWeatherData(
+        lat: location.latitude!,
+        lon: location.longitude!,
+        notify: () {
+          setState(() {
+            print("weather updated");
+          });
+        });
   }
 
   @override
@@ -32,17 +43,49 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
           children: [
-            // Text("Lat: ${location.latitude?.toString() ?? 'waiting ...'}"),
-            // Text("Lon: ${location.longitude?.toString() ?? 'waiting ...'}"),
-            weather.weatherData == null ? CircularProgressIndicator() :
-            Text(""
-                "${weather.weatherTempImperial ?? ""} - "
-                "${weather.weatherMain ?? "waiting ..."}"),
+            weatherCard(),
           ],
         ),
       ),
     );
   }
-}
 
+  Widget weatherCard() {
+    const textStyleNormal = TextStyle(
+        fontSize: 20);
+    const textStyleLarge = TextStyle(
+        fontSize: 70,
+    );
+
+    return SizedBox(
+      height: 300,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.max,
+
+        children: [
+          Text(
+            weather.weatherIcon != null
+                ? weather.weatherIcon!
+                : "Loading...",
+            style: textStyleLarge,
+          ),
+          Text(
+            location.cityState != "" ? location.cityState : "unknown",
+            style: textStyleNormal,
+          ),
+          weather.weatherTempImperial == null
+              ? CircularProgressIndicator()
+              : Text("${weather.weatherTempImperial?.round().toString()}°",
+                  style: textStyleLarge),
+          Text(
+            weather.weatherMessage != null ? weather.weatherMessage : "unknown",
+            style: textStyleNormal,
+          ),
+        ],
+      ),
+    );
+  }
+}
