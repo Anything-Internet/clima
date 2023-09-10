@@ -19,9 +19,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   getLocation() async {
     await location.getCurrentLocation(notify: () {
-      setState(() {
-        print("location updated");
-      });
+      setState(() {});
       getWeather();
     });
   }
@@ -31,9 +29,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         lat: location.latitude!,
         lon: location.longitude!,
         notify: () {
-          setState(() {
-            print("weather updated");
-          });
+          setState(() {});
         });
   }
 
@@ -85,35 +81,36 @@ class _LoadingScreenState extends State<LoadingScreen> {
           width: 2,
         ),
       ),
-      child: Column(
+      child: weather.weatherData == null
+          ? Text(
+              "Forecasting ...",
+              style: textStyleNormal,
+            )
+          : Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.max,
         children: [
           Text(
-            weather.weatherIcon != null ? weather.weatherIcon! : "Loading...",
+            weather.weatherIcon ?? "",
             style: textStyleLarge,
           ),
           Text(
-            location.cityState != "" ? location.cityState : "unknown",
+            location.cityState ?? "",
             style: textStyleNormal,
           ),
           Text(
-            weather.weatherDateTimeString != null
-                ? weather.weatherDateTimeString!
-                : "",
+            weather.weatherDateTimeString ?? "",
           ),
           SizedBox(
             height: 10,
           ),
-          weather.weatherTempImperial == null
-              ? CircularProgressIndicator()
-              : Text("${weather.weatherTempImperial?.round().toString()}°",
-                  style: textStyleLarge),
+          Text(weather.weatherTempImperialString ?? "",
+              style: textStyleLarge),
           SizedBox(
             height: 10,
           ),
           Text(
-            weather.weatherMessage != null ? weather.weatherMessage : "unknown",
+            weather.weatherMessage ?? "",
             style: textStyleNormal,
           ),
         ],

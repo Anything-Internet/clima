@@ -14,20 +14,19 @@ class Location {
   List<Placemark> placeMarks = [];
   double? longitude;
   double? latitude;
-  String _cityState = "";
+  String? _cityState;
 
   // getter / setter for position
   Position? get position {
     return _position;
   }
 
-  String get cityState {
+  String? get cityState {
     return _cityState;
   }
 
-  set cityState(String cityState) {
+  set cityState(String? cityState) {
     _cityState = cityState;
-    print("cityState: $cityState");
   }
 
   set position(Position? position) {
@@ -35,12 +34,12 @@ class Location {
     longitude = position.longitude;
     latitude = position.latitude;
 
-    // // override to my location
-    latitude = 29.7141684;
-    longitude = -95.5333662;
-
-    print("longitude: $longitude");
-    print("latitude: $latitude");
+    // // override default to my location
+    if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
+      longitude = -95.5333662;
+      latitude = 29.7141684;
+      print("Adjusted Location: $longitude, $latitude");
+    }
   }
 
   ///////////////////////////////////////////////////////
@@ -56,12 +55,9 @@ class Location {
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      print("Permission denied");
+      print("Location permission access denied");
       return;
     }
-
-    // test code to simulate a delay
-    // sleep(Duration(seconds: 5));
 
     try {
       position = await Geolocator.getCurrentPosition(
@@ -76,7 +72,6 @@ class Location {
     }
     finally {
       if (notify != null) {
-        print("notify");
         notify!();
       }
     }
