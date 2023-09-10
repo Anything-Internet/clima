@@ -92,7 +92,7 @@ class Weather {
     if (temp > 90) {
       return 'It\'s 🍦 time';
     } else if (temp > 75) {
-      return 'Time for shorts and 👕';
+      return 'Time for 🩳 and 👕';
     } else if (temp < 60) {
       return 'You\'ll need 🧣 and 🧤';
     } else {
