@@ -6,6 +6,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'location_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
+  final double? longitude;
+  final double? latitude;
+
+  LoadingScreen({Key? key, this.longitude, this.latitude}) : super(key: key);
+
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
 }
@@ -18,20 +23,26 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.longitude != null && widget.latitude != null) {
+      weather = Weather(
+          longitude: widget.longitude,
+          latitude: widget.latitude,
+          notify: () => callback());
+    } else {
+      weather = Weather(notify: () => callback());
+    }
   }
 
   callback() {
     weatherData = WeatherData(
-        weatherData: weather.weatherData,
-        cityState: weather.cityState);
+        weatherData: weather.weatherData, cityState: weather.cityState);
 
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) {
-          return LocationScreen(
-            weatherData: weatherData,
-            cityState: weather.cityState,
-          );
-        }));
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen(
+        weatherData: weatherData,
+        cityState: weather.cityState,
+      );
+    }));
   }
 
   @override
@@ -39,7 +50,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // once weather finishes fetching,
     // it will redirect to the next page.
     this.context = context;
-    weather = Weather(notify: () => callback());
 
     return Scaffold(
       body: Center(

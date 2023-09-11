@@ -34,15 +34,23 @@ class Location {
     longitude = position.longitude;
     latitude = position.latitude;
 
+    print("DEVICE Location: $longitude, $latitude");
+
     // override default Android location to my location
     if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
       longitude = -95.5333662;
       latitude = 29.7141684;
-      print("Adjusted Location: $longitude, $latitude");
+      print("ADJUSTED Location: $longitude, $latitude");
     }
   }
 
-  Future<void> getCurrentLocation({notify}) async {
+  Future<String?> findCityState(longitude, latitude) async {
+    placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
+    cityState = "${placeMarks[0].locality} ${placeMarks[0].administrativeArea}".trim();
+    return cityState;
+  }
+
+  Future<void> findCurrentLocation({notify}) async {
 
     this.notify = notify;
 
@@ -61,8 +69,7 @@ class Location {
           desiredAccuracy: LocationAccuracy.low);
 
       if(longitude != null && latitude != null) {
-        placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
-        cityState = "${placeMarks[0].locality}, ${placeMarks[0].administrativeArea}";
+        cityState = await findCityState(longitude, latitude);
       }
     } catch (e) {
       print(e);

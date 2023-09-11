@@ -113,6 +113,20 @@ class _LocationScreenState extends State<LocationScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    ButtonStyle buttonStyle = ButtonStyle(
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+      ),
+    padding: MaterialStateProperty.all<EdgeInsets>( EdgeInsets.all(5.0),
+    ));
+
+    TextStyle buttonTextStyle = TextStyle(
+      fontSize: 22,
+    );
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -141,24 +155,43 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   ElevatedButton(
+                    style: buttonStyle,
                     onPressed: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return LoadingScreen();
-                      }));
+                      changeLocation(city: "home", context: context);
                     },
-                    child: Icon(
-                      Icons.near_me,
-                      size: 50.0,
-                      color: Colors.white,
+                    child: Text(
+                      "Home",
+                      style: buttonTextStyle,
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {},
-                    child: Icon(
-                      Icons.location_city,
-                      size: 50.0,
-                      color: Colors.white,
+                    style: buttonStyle,
+                    onPressed: () {
+                      changeLocation(city: "tokyo", context: context);
+                    },
+                    child: Text(
+                      "Tokyo",
+                      style: buttonTextStyle,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: buttonStyle,
+                    onPressed: () {
+                      changeLocation(city: "london", context: context);
+                    },
+                    child: Text(
+                      "London",
+                      style: buttonTextStyle,
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: buttonStyle,
+                    onPressed: () {
+                      changeLocation(city: "san fernando", context: context);
+                    },
+                    child: Text(
+                      "San Fernando",
+                      style: buttonTextStyle,
                     ),
                   ),
                 ],
@@ -229,5 +262,40 @@ class _LocationScreenState extends State<LocationScreen> {
         ),
       ),
     );
+  }
+
+  changeLocation({city, context}) {
+    double? lat = null;
+    double? lon = null;
+
+    if (city != null) {
+      switch (city) {
+        case 'london':
+          lat = 51.481127;
+          lon = -0.452956;
+          break;
+        case 'tokyo':
+          lat = 35.680060;
+          lon = 139.761564;
+          break;
+        case 'san fernando':
+          lat = 15.063690;
+          lon = 120.650761;
+          break;
+      }
+    }
+
+    if (lat != null && lon != null) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return LoadingScreen(
+          latitude: lat,
+          longitude: lon,
+        );
+      }));
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return LoadingScreen();
+      }));
+    }
   }
 }

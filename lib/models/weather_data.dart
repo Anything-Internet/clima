@@ -11,11 +11,21 @@ class WeatherData {
   int? get weatherDateTimeStamp {
     return weatherData == null ? null : weatherData["current"]["dt"] * 1000000;
   }
+  int? get timeZoneOffset {
+      return weatherData == null ? null : weatherData["timezone_offset"];
+  }
 
   String? get weatherDateTimeString {
-    return weatherData == null
-        ? null
-        : DateFormat.yMd()
+
+    if (weatherDateTimeStamp == null) {
+      return null;
+    }
+
+    // DateTime localTime = DateTime.fromMicrosecondsSinceEpoch(
+    //     weatherDateTimeStamp! - (timeZoneOffset! * 1000000));
+    // //return DateFormat.yMd().add_jm().format(localTime);
+
+    return DateFormat.yMd()
             .add_jm()
             .format(DateTime.fromMicrosecondsSinceEpoch(weatherDateTimeStamp!));
   }
