@@ -1,13 +1,13 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 class NetworkRequester {
-  static get(String url) async {
+  static getWebData(String url) async {
     String? rawData;
     dynamic data;
 
     try {
-      http.Response response = await http.get(Uri.parse(url));
+      Response response = await get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         rawData = await response.body;

@@ -16,6 +16,7 @@ dependencies:
   http:
   intl:
   flutter_dotenv:
+  flutter_spinkit:
 
 
 dev_dependencies:

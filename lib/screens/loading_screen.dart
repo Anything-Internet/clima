@@ -1,6 +1,9 @@
+import 'package:clima/models/weather_data.dart';
 import 'package:flutter/material.dart';
-import 'package:clima/services/location.dart';
 import 'package:clima/services/weather.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'location_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -8,112 +11,49 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  Location location = Location();
-  Weather weather = Weather();
+  late Weather weather;
+  late WeatherData weatherData;
+  late BuildContext context;
 
   @override
   void initState() {
     super.initState();
-    getLocation();
   }
 
-  getLocation() async {
-    await location.getCurrentLocation(notify: () {
-      setState(() {});
-      getWeather();
-    });
-  }
+  callback() {
+    weatherData = WeatherData(
+        weatherData: weather.weatherData,
+        cityState: weather.cityState);
 
-  getWeather() async {
-    await weather.getWeatherData(
-        lat: location.latitude!,
-        lon: location.longitude!,
-        notify: () {
-          setState(() {});
-        });
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) {
+          return LocationScreen(
+            weatherData: weatherData,
+            cityState: weather.cityState,
+          );
+        }));
   }
 
   @override
   Widget build(BuildContext context) {
+    // once weather finishes fetching,
+    // it will redirect to the next page.
+    this.context = context;
+    weather = Weather(notify: () => callback());
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            weatherCard(),
-            OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.indigo[900],
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  side: BorderSide(
-                    color: Colors.indigo[400]!,
-                    width: 2,
-                  ),
-                ),
-                onPressed: getLocation,
-                child: Text("Refresh")),
+            SpinKitDoubleBounce(
+              color: Color.fromRGBO(50, 50, 255, 1),
+              duration: Duration(milliseconds: 1500),
+              size: 150.0,
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget weatherCard() {
-    const textStyleNormal = TextStyle(
-      fontSize: 26,
-    );
-    const textStyleLarge = TextStyle(
-      fontSize: 70,
-    );
-
-    return Container(
-      padding: EdgeInsets.all(30),
-      margin: EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        color: Colors.indigo[900],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Colors.indigo[400]!,
-          width: 2,
-        ),
-      ),
-      child: weather.weatherData == null
-          ? Text(
-              "Forecasting ...",
-              style: textStyleNormal,
-            )
-          : Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Text(
-            weather.weatherIcon ?? "",
-            style: textStyleLarge,
-          ),
-          Text(
-            location.cityState ?? "",
-            style: textStyleNormal,
-          ),
-          Text(
-            weather.weatherDateTimeString ?? "",
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(weather.weatherTempImperialString ?? "",
-              style: textStyleLarge),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            weather.weatherMessage ?? "",
-            style: textStyleNormal,
-          ),
-        ],
       ),
     );
   }

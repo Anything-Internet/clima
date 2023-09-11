@@ -34,16 +34,13 @@ class Location {
     longitude = position.longitude;
     latitude = position.latitude;
 
-    // // override default to my location
+    // override default Android location to my location
     if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
       longitude = -95.5333662;
       latitude = 29.7141684;
       print("Adjusted Location: $longitude, $latitude");
     }
   }
-
-  ///////////////////////////////////////////////////////
-  // main functions - get current location and permission
 
   Future<void> getCurrentLocation({notify}) async {
 
