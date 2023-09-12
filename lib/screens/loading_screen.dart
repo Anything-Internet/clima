@@ -1,90 +1,81 @@
+import 'package:clima/models/weather_data.dart';
 import 'package:flutter/material.dart';
-import 'package:clima/services/location.dart';
 import 'package:clima/services/weather.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'location_screen.dart';
 
 class LoadingScreen extends StatefulWidget {
+  final double? longitude;
+  final double? latitude;
+  final String? cityState;
+  LoadingScreen({
+    Key? key,
+    this.longitude,
+    this.latitude,
+    this.cityState,
+  }) : super(key: key);
+
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  Location location = Location();
-  Weather weather = Weather();
+  late Weather weather;
+  late WeatherData weatherData;
+  late BuildContext context;
 
   @override
   void initState() {
     super.initState();
-    getLocation();
+
+    // if cityState is not null, then we are coming from the city screen
+    // and we need to fetch the weather data for the city
+    if (widget.cityState != null) {
+      weather = Weather(
+          cityState: widget.cityState,
+          notify: () => callback());
+    } else if (widget.longitude != null && widget.latitude != null) {
+      weather = Weather(
+          longitude: widget.longitude,
+          latitude: widget.latitude,
+          notify: () => callback());
+    } else {
+      weather = Weather(notify: () => callback());
+    }
   }
 
-  getLocation() async {
-    await location.getCurrentLocation(notify: () {
-      setState(() {
-        print("location updated");
-      });
-      getWeather();
-    });
-  }
+  callback() {
+    weatherData = WeatherData(
+        weatherData: weather.weatherData, cityState: weather.cityState);
 
-  getWeather() async {
-    await weather.getWeatherData(
-        lat: location.latitude!,
-        lon: location.longitude!,
-        notify: () {
-          setState(() {
-            print("weather updated");
-          });
-        });
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return LocationScreen(
+        weatherData: weatherData,
+        cityState: weather.cityState,
+      );
+    }));
   }
 
   @override
   Widget build(BuildContext context) {
+    // once weather finishes fetching,
+    // it will redirect to the next page.
+    this.context = context;
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: [
-            weatherCard(),
+            SpinKitDoubleBounce(
+              color: Color.fromRGBO(50, 50, 255, 1),
+              duration: Duration(milliseconds: 1500),
+              size: 150.0,
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget weatherCard() {
-    const textStyleNormal = TextStyle(
-        fontSize: 20);
-    const textStyleLarge = TextStyle(
-        fontSize: 70,
-    );
-
-    return SizedBox(
-      height: 300,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        mainAxisSize: MainAxisSize.max,
-
-        children: [
-          Text(
-            weather.weatherIcon != null
-                ? weather.weatherIcon!
-                : "Loading...",
-            style: textStyleLarge,
-          ),
-          Text(
-            location.cityState != "" ? location.cityState : "unknown",
-            style: textStyleNormal,
-          ),
-          weather.weatherTempImperial == null
-              ? CircularProgressIndicator()
-              : Text("${weather.weatherTempImperial?.round().toString()}°",
-                  style: textStyleLarge),
-          Text(
-            weather.weatherMessage != null ? weather.weatherMessage : "unknown",
-            style: textStyleNormal,
-          ),
-        ],
       ),
     );
   }

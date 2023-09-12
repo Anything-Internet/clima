@@ -14,20 +14,19 @@ class Location {
   List<Placemark> placeMarks = [];
   double? longitude;
   double? latitude;
-  String _cityState = "";
+  String? _cityState;
 
   // getter / setter for position
   Position? get position {
     return _position;
   }
 
-  String get cityState {
+  String? get cityState {
     return _cityState;
   }
 
-  set cityState(String cityState) {
+  set cityState(String? cityState) {
     _cityState = cityState;
-    print("cityState: $cityState");
   }
 
   set position(Position? position) {
@@ -35,18 +34,34 @@ class Location {
     longitude = position.longitude;
     latitude = position.latitude;
 
-    // // override to my location
-    latitude = 29.7141684;
-    longitude = -95.5333662;
+    print("DEVICE Location: $longitude, $latitude");
 
-    print("longitude: $longitude");
-    print("latitude: $latitude");
+    // override default Android location to my location
+    if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
+      longitude = -95.5333662;
+      latitude = 29.7141684;
+      print("ADJUSTED Location: $longitude, $latitude");
+    }
   }
 
-  ///////////////////////////////////////////////////////
-  // main functions - get current location and permission
+  findLongitudeLatitude(cityState) async {
+    List<dynamic> locations;
+    try {
+      locations = await locationFromAddress(cityState);
+      longitude = locations[0].longitude;
+      latitude = locations[0].latitude;
+    } catch (e) {
+      print(e);
+    }
+  }
 
-  Future<void> getCurrentLocation({notify}) async {
+  Future<String?> findCityState(longitude, latitude) async {
+    placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
+    cityState = "${placeMarks[0].locality} ${placeMarks[0].administrativeArea}".trim();
+    return cityState;
+  }
+
+  Future<void> findCurrentLocation({notify}) async {
 
     this.notify = notify;
 
@@ -56,27 +71,22 @@ class Location {
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
-      print("Permission denied");
+      print("Location permission access denied");
       return;
     }
-
-    // test code to simulate a delay
-    // sleep(Duration(seconds: 5));
 
     try {
       position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low);
 
       if(longitude != null && latitude != null) {
-        placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
-        cityState = "${placeMarks[0].locality}, ${placeMarks[0].administrativeArea}";
+        cityState = await findCityState(longitude, latitude);
       }
     } catch (e) {
       print(e);
     }
     finally {
       if (notify != null) {
-        print("notify");
         notify!();
       }
     }
