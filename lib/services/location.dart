@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -37,15 +39,35 @@ class Location {
     print("DEVICE Location: $longitude, $latitude");
 
     // override default Android location to my location
-    if(longitude == -122.08395287867832 && latitude == 37.42342342342342) {
+    if (longitude == -122.08395287867832 && latitude == 37.42342342342342) {
       longitude = -95.5333662;
       latitude = 29.7141684;
       print("ADJUSTED Location: $longitude, $latitude");
     }
   }
 
+  bool findLocationEnabled() {
+    if (kIsWeb) {
+      print("Find locaiton not supported on web.");
+      return false;
+    }
+
+    if (Platform.isAndroid) {
+      return true;
+    } else if (Platform.isIOS) {
+      return true;
+    }
+    print("Find location not supported on Mac/Linux/Windows.");
+
+    return false;
+  }
+
   findLongitudeLatitude(cityState) async {
     List<dynamic> locations;
+    if (findLocationEnabled() == false) {
+      return;
+    }
+
     try {
       locations = await locationFromAddress(cityState);
       longitude = locations[0].longitude;
@@ -55,14 +77,21 @@ class Location {
     }
   }
 
-  Future<String?> findCityState(longitude, latitude) async {
-    placeMarks = await placemarkFromCoordinates(latitude!, longitude!);
-    cityState = "${placeMarks[0].locality} ${placeMarks[0].administrativeArea}".trim();
-    return cityState;
+  findCityState(longitude, latitude) async {
+    if (findLocationEnabled() == false) {
+      return;
+    }
+    try {
+      placeMarks = await placemarkFromCoordinates(latitude, longitude);
+      cityState =
+          "${placeMarks[0].locality} ${placeMarks[0].administrativeArea}"
+              .trim();
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> findCurrentLocation({notify}) async {
-
     this.notify = notify;
 
     if (permission == null) {
@@ -79,13 +108,12 @@ class Location {
       position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low);
 
-      if(longitude != null && latitude != null) {
+      if (longitude != null && latitude != null) {
         cityState = await findCityState(longitude, latitude);
       }
     } catch (e) {
       print(e);
-    }
-    finally {
+    } finally {
       if (notify != null) {
         notify!();
       }
