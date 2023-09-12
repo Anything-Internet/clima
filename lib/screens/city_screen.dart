@@ -7,12 +7,12 @@ class CityScreen extends StatefulWidget {
   _CityScreenState createState() => _CityScreenState();
 }
 
-handleSubmitted(context, cityName) {
+handleSubmitted(context, searchAddress) {
   Navigator.push(
     context,
     MaterialPageRoute(
       builder: (context) => LoadingScreen(
-        cityState: cityName,
+        searchAddress: searchAddress,
       ),
     ),
   );

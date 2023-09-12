@@ -62,14 +62,14 @@ class Location {
     return false;
   }
 
-  findLongitudeLatitude(cityState) async {
+  findLongitudeLatitude(searchAddress) async {
     List<dynamic> locations;
     if (findLocationEnabled() == false) {
       return;
     }
 
     try {
-      locations = await locationFromAddress(cityState);
+      locations = await locationFromAddress(searchAddress);
       longitude = locations[0].longitude;
       latitude = locations[0].latitude;
     } catch (e) {
@@ -77,9 +77,9 @@ class Location {
     }
   }
 
-  findCityState(longitude, latitude) async {
+  Future<String?> findCityState(longitude, latitude) async {
     if (findLocationEnabled() == false) {
-      return;
+      return null;
     }
     try {
       placeMarks = await placemarkFromCoordinates(latitude, longitude);
@@ -89,6 +89,7 @@ class Location {
     } catch (e) {
       print(e);
     }
+    return cityState;
   }
 
   Future<void> findCurrentLocation({notify}) async {

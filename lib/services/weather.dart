@@ -8,11 +8,12 @@ class Weather {
   double? latitude;
   double? longitude;
   String? cityState;
+  String? searchAddress;
   Location location = Location();
 
   Weather({
     this.notify,
-    this.cityState,
+    this.searchAddress,
     this.longitude,
     this.latitude}) {
     loadData();
@@ -20,9 +21,9 @@ class Weather {
 
   loadData() async {
 
-    if(cityState != null) {
+    if(searchAddress != null) {
       // get longitude, latitude from cityState
-      await location.findLongitudeLatitude(cityState!);
+      await location.findLongitudeLatitude(searchAddress!);
       latitude = location.latitude;
       longitude = location.longitude;
     }

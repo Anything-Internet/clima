@@ -8,12 +8,12 @@ import 'location_screen.dart';
 class LoadingScreen extends StatefulWidget {
   final double? longitude;
   final double? latitude;
-  final String? cityState;
+  final String? searchAddress;
   LoadingScreen({
     Key? key,
     this.longitude,
     this.latitude,
-    this.cityState,
+    this.searchAddress,
   }) : super(key: key);
 
   @override
@@ -31,9 +31,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
     // if cityState is not null, then we are coming from the city screen
     // and we need to fetch the weather data for the city
-    if (widget.cityState != null) {
+    if (widget.searchAddress != null) {
       weather = Weather(
-          cityState: widget.cityState,
+          searchAddress: widget.searchAddress,
           notify: () => callback());
     } else if (widget.longitude != null && widget.latitude != null) {
       weather = Weather(
